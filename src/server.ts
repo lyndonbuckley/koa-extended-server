@@ -1,9 +1,9 @@
-import {createServer, Server} from "http";
-import * as Koa from "koa";
+import { createServer, Server } from 'http';
+import * as Koa from 'koa';
 
 export class KoaExtendedServer extends Koa {
     httpServer: Server;
-    banner: string = 'koa'
+    banner: string = 'koa';
     isShuttingDown: boolean = false;
     isReady: boolean = false;
     sendReady: boolean = true;
@@ -19,19 +19,17 @@ export class KoaExtendedServer extends Koa {
         this.use(this.firstMiddleware.bind(this));
 
         const callback = this.listeningCallback.bind(this);
-        this.httpServer.on('listening', function(this: Server){
+        this.httpServer.on('listening', function (this: Server) {
             callback(this);
         });
-        process.on('SIGTERM',this.processShutdown.bind(this));
-        process.on('SIGINT',this.processShutdown.bind(this));
+        process.on('SIGTERM', this.processShutdown.bind(this));
+        process.on('SIGINT', this.processShutdown.bind(this));
     }
 
     private async firstMiddleware(ctx: Koa.Context, next: Koa.Next) {
-        if (this.banner)
-            ctx.set('Server', this.banner);
+        if (this.banner) ctx.set('Server', this.banner);
 
-        if (!this.isShuttingDown)
-            return await next();
+        if (!this.isShuttingDown) return await next();
 
         // shutting down
         ctx.status = 503;
@@ -39,54 +37,47 @@ export class KoaExtendedServer extends Koa {
     }
 
     private processShutdown() {
-        if (this.isShuttingDown)
-            return;
+        if (this.isShuttingDown) return;
 
         this.isShuttingDown = true;
         this.isReady = false;
 
         console.warn(this.banner + ' shutting down ...');
-        this.httpServer.close(() =>{
+        this.httpServer.close(() => {
             console.info(this.banner + ' connections closed');
             process.exit(0);
-        })
+        });
 
-        setTimeout(()=>{
+        setTimeout(() => {
             console.error('Forcing exit - unable to close connections in time');
             process.exit(1);
         }, this.shutdownTimeout);
     }
 
-    private listeningCallback(listener: Server){
+    private listeningCallback(listener: Server) {
         const listeningAt = listener.address();
-        if (listeningAt && typeof(listeningAt) === "object") {
+        if (listeningAt && typeof listeningAt === 'object') {
             this.listeningAddress = listeningAt.address;
             this.listeningPort = listeningAt.port;
             console.info(`${this.banner} listening on ${this.listeningAddress}:${this.listeningPort}`);
         }
-        if (this.readyOnceListening)
-            this.ready();
+        if (this.readyOnceListening) this.ready();
     }
 
-    http(port?: number, host?: string ) {
-        if (!port)
-            port = Number(process.env.PORT) || 8080;
+    http(port?: number, host?: string) {
+        if (!port) port = Number(process.env.PORT) || 8080;
 
-        if (!host)
-            host = '0.0.0.0';
+        if (!host) host = '0.0.0.0';
 
         const callback = this.listeningCallback.bind(this);
-        this.listen(port, host, function(this: Server){
+        this.listen(port, host, function (this: Server) {
             callback(this);
         });
     }
 
-    ready(){
+    ready() {
         this.isReady = true;
         console.info(this.banner + ' is ready.');
-        if (this.sendReady && process.send)
-            process.send('ready');
+        if (this.sendReady && process.send) process.send('ready');
     }
-
 }
-
