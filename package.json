@@ -24,10 +24,8 @@
   },
   "keywords": [
     "node",
-    "unique",
-    "identifier",
-    "id",
-    "generator"
+    "koa",
+    "server"
   ],
   "author": "Lyndon Buckley <npm@lyndonbuckley.com>",
   "license": "GPL-3.0-or-later",
