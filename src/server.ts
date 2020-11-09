@@ -33,7 +33,7 @@ export class KoaExtendedServer extends Koa {
         if (!this.isShuttingDown)
             return await next();
 
-        //shutting down
+        // shutting down
         ctx.status = 503;
         ctx.set('Connection', 'close');
     }
