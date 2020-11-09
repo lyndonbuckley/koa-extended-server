@@ -1,5 +1,5 @@
-import { createServer, Server } from 'http';
-import * as Koa from 'koa';
+import Koa = require("koa");
+import {Server, createServer} from "http";
 
 export class KoaExtendedServer extends Koa {
     httpServer: Server;
