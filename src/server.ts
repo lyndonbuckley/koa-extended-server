@@ -49,7 +49,7 @@ export class KoaExtendedServer extends Koa {
         console.warn(this.banner + ' shutting down ...');
 
         const app = this;
-        (async() => {
+        (async () => {
             let f: () => void;
             for (f of app.shutdownFunctions) {
                 f.bind(app);
@@ -65,7 +65,6 @@ export class KoaExtendedServer extends Koa {
                 process.exit(1);
             }, app.shutdownTimeout);
         })();
-
     }
 
     private listeningCallback(listener: Server) {
