@@ -4,6 +4,7 @@ import { Server, createServer } from 'http';
 export class KoaExtendedServer extends Koa {
     httpServer: Server;
     banner: string = 'koa';
+    shutdownFunctions: Function[] = [];
     isShuttingDown: boolean = false;
     isReady: boolean = false;
     sendReady: boolean = true;
@@ -26,6 +27,10 @@ export class KoaExtendedServer extends Koa {
         process.on('SIGINT', this.processShutdown.bind(this));
     }
 
+    onShutdown(func: Function) {
+        this.shutdownFunctions.push(func);
+    }
+
     private async firstMiddleware(ctx: Koa.Context, next: Koa.Next) {
         if (this.banner) ctx.set('Server', this.banner);
 
@@ -41,17 +46,27 @@ export class KoaExtendedServer extends Koa {
 
         this.isShuttingDown = true;
         this.isReady = false;
-
         console.warn(this.banner + ' shutting down ...');
-        this.httpServer.close(() => {
-            console.info(this.banner + ' connections closed');
-            process.exit(0);
-        });
 
-        setTimeout(() => {
-            console.error('Forcing exit - unable to close connections in time');
-            process.exit(1);
-        }, this.shutdownTimeout);
+        const app = this;
+        (async function() {
+
+            let f: Function;
+            for (f of app.shutdownFunctions) {
+                f.bind(app);
+                await f();
+            }
+            app.httpServer.close(() => {
+                console.info(app.banner + ' connections closed');
+                process.exit(0);
+            });
+
+            setTimeout(() => {
+                console.error('Forcing exit - unable to close connections in time');
+                process.exit(1);
+            }, app.shutdownTimeout);
+        })();
+
     }
 
     private listeningCallback(listener: Server) {
