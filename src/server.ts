@@ -4,7 +4,7 @@ import { Server, createServer } from 'http';
 export class KoaExtendedServer extends Koa {
     httpServer: Server;
     banner: string = 'koa';
-    shutdownFunctions: Function[] = [];
+    shutdownFunctions: (() => void)[] = [];
     isShuttingDown: boolean = false;
     isReady: boolean = false;
     sendReady: boolean = true;
@@ -27,7 +27,7 @@ export class KoaExtendedServer extends Koa {
         process.on('SIGINT', this.processShutdown.bind(this));
     }
 
-    onShutdown(func: Function) {
+    onShutdown(func: () => void) {
         this.shutdownFunctions.push(func);
     }
 
@@ -49,9 +49,8 @@ export class KoaExtendedServer extends Koa {
         console.warn(this.banner + ' shutting down ...');
 
         const app = this;
-        (async function() {
-
-            let f: Function;
+        (async() => {
+            let f: () => void;
             for (f of app.shutdownFunctions) {
                 f.bind(app);
                 await f();
