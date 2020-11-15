@@ -32,6 +32,9 @@ export class Application extends Koa {
 
         if (opts?.useConsole) this.useConsole();
 
+        if (opts?.shutdownTimeout)
+            this._shutdownTimeout = opts.shutdownTimeout;
+
         // initialising state
         this._runningState = this.setRunningState(ApplicationRunningState.Initialising);
 

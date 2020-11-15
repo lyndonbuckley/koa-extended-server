@@ -11,6 +11,7 @@ export interface ApplicationOptions {
     onShutdown?: ApplicationEventCallback[] | ApplicationEventCallback;
     startupCallbackMode?: EventCallbackMode;
     shutdownCallbackMode?: EventCallbackMode;
+    shutdownTimeout?: number;
 }
 
 export type CallbackArguments = [any?, ...any[]];
