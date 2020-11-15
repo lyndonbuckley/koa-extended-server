@@ -25,13 +25,13 @@ async function demoCountdown(label: string, limit: number = 3): Promise<boolean>
     return await new Promise((resolve, reject) =>{
         let count:number = 0;
         function step() {
-            count++;
             if (count >= limit)
-                resolve(true);
+                return resolve(true);
             else
                 setTimeout(step, 1000);
+            console.info(label + ' in ' + (limit - count));
+            count++;
         }
-        console.info(label + ' in ' + (limit - count + 1));
-        setTimeout(step, 1000);
+        step();
     });
 }
