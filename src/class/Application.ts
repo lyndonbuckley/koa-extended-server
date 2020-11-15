@@ -64,8 +64,7 @@ export class Application extends Koa {
 
     getBanner(suffix?: string) {
         const banner: string = this.banner || 'KoaExtendedServer';
-        if (suffix)
-            return `${banner} ${suffix}`
+        if (suffix) return `${banner} ${suffix}`;
         return banner;
     }
 
