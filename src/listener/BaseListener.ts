@@ -39,8 +39,20 @@ export class BaseListener {
         }
     }
 
-    async listen(): Promise<boolean> {
+    async _listen(): Promise<boolean> {
         return false;
+    }
+    async listen(): Promise<boolean> {
+        const listening = await this._listen();
+        if (!listening) {
+            this.state = ListenerState.Error;
+            return false
+        }
+
+        this.state = ListenerState.Listening;
+        this.app.info(this.app.getBanner() + ' at ' + this.getListeningAddress())
+
+        return listening
     }
 
     async close(): Promise<boolean> {

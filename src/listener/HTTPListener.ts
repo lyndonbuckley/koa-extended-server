@@ -50,19 +50,6 @@ export class HTTPListener extends BaseListener {
         return url + '/';
     }
 
-    async listen(): Promise<boolean> {
-        const listening = await this._listen();
-        if (!listening) {
-            this.state = ListenerState.Error;
-            return false
-        }
-
-        this.state = ListenerState.Listening;
-        this.app.info(this.app.getBanner() + ' listening at ' + this.getListeningAddress())
-
-        return listening
-    }
-
     async _listen(): Promise<boolean> {
         const {app, server} = this;
         return new Promise((resolve, reject)=>{
