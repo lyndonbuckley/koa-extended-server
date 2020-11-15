@@ -68,9 +68,7 @@ export class Application extends Koa {
     private async _healthCheckMiddleware(ctx: Context, next: Next) {
         const userAgent = ctx.request.headers['user-agent'] || '';
         if (this.healthCheck.userAgent.indexOf(userAgent) >= 0) return this._handleHealthCheck(ctx);
-
         if (this.healthCheck.endpoint.indexOf(ctx.path) >= 0) return this._handleHealthCheck(ctx);
-
         return await next();
     }
 
