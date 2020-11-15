@@ -30,8 +30,6 @@ export class EventHandler<T = CallbackArguments> {
     }
 
     async process(args?: T): Promise<boolean> {
-        console.info('process', this.type, args);
-
         const event: ApplicationEvent<T> = {
             type: this.type,
             time: new Date(),
