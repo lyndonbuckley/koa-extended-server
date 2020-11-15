@@ -42,6 +42,9 @@ export class Application extends Koa {
         this.use(this._requestMiddleware.bind(this));
     }
 
+    // PROXY - by default use proxy headers
+    proxy: boolean = true;
+
     private _runningState: ApplicationRunningState;
 
     get runningState(): ApplicationRunningState {
