@@ -21,7 +21,7 @@ app.start().catch((err)=> {
     console.error(err);
 });
 
-async function demoCountdown(label: string, limit: number = 5): Promise<boolean> {
+async function demoCountdown(label: string, limit: number = 3): Promise<boolean> {
     return await new Promise((resolve, reject) =>{
         let count:number = 0;
         function step() {
