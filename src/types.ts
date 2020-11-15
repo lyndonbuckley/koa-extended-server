@@ -12,6 +12,15 @@ export interface ApplicationOptions {
     startupCallbackMode?: EventCallbackMode;
     shutdownCallbackMode?: EventCallbackMode;
     shutdownTimeout?: number;
+    healthCheck?: {
+        endpoint?: string | (string[]),
+        userAgent?: string | (string[])
+    }
+}
+
+export interface HealthCheckOptions {
+    endpoint: string[],
+    userAgent: string[]
 }
 
 export type CallbackArguments = [any?, ...any[]];
