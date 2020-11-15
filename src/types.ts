@@ -7,8 +7,10 @@ export interface ApplicationOptions {
     useConsole?: boolean;
     onStartup?: ApplicationEventCallback[] | ApplicationEventCallback;
     onShutdown?: ApplicationEventCallback[] | ApplicationEventCallback;
+    onListening?: ApplicationEventCallback[] | ApplicationEventCallback;
     startupCallbackMode?: EventCallbackMode;
     shutdownCallbackMode?: EventCallbackMode;
+    listeningCallbackMode?: EventCallbackMode;
     shutdownTimeout?: number;
     healthCheck?: {
         endpoint?: string | string[];

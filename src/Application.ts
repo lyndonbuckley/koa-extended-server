@@ -21,12 +21,13 @@ export class Application extends Koa {
         // events
         this._onStartup = new EventHandler(this, EventType.Startup, opts?.startupCallbackMode, opts?.onStartup);
         this._onShutdown = new EventHandler(this, EventType.Shutdown, opts?.shutdownCallbackMode, opts?.onShutdown);
+        this._onListening = new EventHandler(this, EventType.Listening, opts?.listeningCallbackMode, opts?.onListening);
+        this._onRequest = new EventHandler(this, EventType.Request);
+
         this._onLog = new EventHandler(this, EventType.Log);
         this._onInfo = new EventHandler(this, EventType.Info);
         this._onWarn = new EventHandler(this, EventType.Warn);
         this._onError = new EventHandler(this, EventType.Error);
-        this._onListening = new EventHandler(this, EventType.Listening);
-        this._onRequest = new EventHandler(this, EventType.Request);
 
         // options
         if (opts?.banner) this.banner = opts.banner;
@@ -218,12 +219,19 @@ export class Application extends Koa {
         switch (this._runningState) {
             case ApplicationRunningState.Initialising:
                 this.setRunningState(ApplicationRunningState.Starting);
-                if (await this.processStartup()) await this.startListeners();
-                else this.error('Startup Callbacks did not all return true');
 
-                if (this.getActiveListeners().length > 0) this.setRunningState(ApplicationRunningState.Listening);
-                else this.setRunningState(ApplicationRunningState.Ready);
+                if (await this.processStartup())
+                    this.setRunningState(ApplicationRunningState.Ready);
+                else
+                    this.error('Startup Callbacks did not all return true');
 
+                if (this.runningState === ApplicationRunningState.Ready)
+                    await this.startListeners();
+
+                if (this.getActiveListeners().length > 0) {
+                    this.setRunningState(ApplicationRunningState.Listening);
+                    await this._onListening.process();
+                }
                 break;
             case ApplicationRunningState.Starting:
                 throw new Error('Called Start function when already starting');

@@ -10,6 +10,9 @@ const app = new Application({
     onShutdown: async () => {
         return await demoCountdown('Shutting Down');
     },
+    onListening: () => {
+        console.log('On Listening Has Been Called')
+    },
 });
 
 app.use(async (ctx: Context, next: Next) => {
