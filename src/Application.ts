@@ -61,7 +61,7 @@ export class Application extends Koa {
 
     // HEALTH CHECK
     healthCheck: HealthCheckOptions = {
-        endpoint: ['/health-check'],
+        endpoint: [],
         userAgent: ['GoogleHC/1.0', 'Mozilla/5.0+(compatible; UptimeRobot/2.0; http://www.uptimerobot.com/)'],
     };
 
