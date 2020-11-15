@@ -14,9 +14,6 @@ import { HTTPListener } from '../listener/HTTPListener';
 import { Context, Next } from 'koa';
 
 export class Application extends Koa {
-
-
-
     constructor(opts?: ApplicationOptions) {
         super();
 
@@ -31,13 +28,9 @@ export class Application extends Koa {
         this._onRequest = new EventHandler(this, EventType.Request);
 
         // options
-        if (opts?.banner)
-            this.banner = opts.banner;
+        if (opts?.banner) this.banner = opts.banner;
 
-        if (opts?.useConsole)
-            this.useConsole();
-
-
+        if (opts?.useConsole) this.useConsole();
 
         // initialising state
         this._runningState = this.setRunningState(ApplicationRunningState.Initialising);
@@ -47,7 +40,6 @@ export class Application extends Koa {
         process.on('SIGINT', this._handleSIGINT.bind(this));
 
         this.use(this._requestMiddleware.bind(this));
-
     }
 
     private _runningState: ApplicationRunningState;
@@ -75,8 +67,6 @@ export class Application extends Koa {
         return this.banner || 'KoaExtendedServer';
     }
 
-
-
     private _onStartup: EventHandler;
 
     onStartup(func: ApplicationEventCallback) {
@@ -99,11 +89,14 @@ export class Application extends Koa {
         this._onLog.addSubscriber(func);
     }
     log(...args: CallbackArguments) {
-        this._onLog.process(args).then(() => {
-            return;
-        }).catch((err) => {
-            console.error(err);
-        });
+        this._onLog
+            .process(args)
+            .then(() => {
+                return;
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     }
 
     private _onInfo: EventHandler;
@@ -111,11 +104,14 @@ export class Application extends Koa {
         this._onInfo.addSubscriber(func);
     }
     info(...args: CallbackArguments) {
-        this._onInfo.process(args).then(() => {
-            return;
-        }).catch((err) => {
-            console.error(err);
-        });
+        this._onInfo
+            .process(args)
+            .then(() => {
+                return;
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     }
 
     private _onWarn: EventHandler;
@@ -123,11 +119,14 @@ export class Application extends Koa {
         this._onWarn.addSubscriber(func);
     }
     warn(...args: CallbackArguments) {
-        this._onWarn.process(args).then(() => {
-            return;
-        }).catch((err) => {
-            console.error(err);
-        });
+        this._onWarn
+            .process(args)
+            .then(() => {
+                return;
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     }
 
     private _onError: EventHandler;
@@ -135,11 +134,14 @@ export class Application extends Koa {
         this._onError.addSubscriber(func);
     }
     error(...args: CallbackArguments) {
-        this._onError.process(args).then(() => {
-            return;
-        }).catch((err) => {
-            console.error(err);
-        });
+        this._onError
+            .process(args)
+            .then(() => {
+                return;
+            })
+            .catch((err) => {
+                console.error(err);
+            });
     }
 
     private _onRequest: EventHandler;
@@ -148,12 +150,12 @@ export class Application extends Koa {
     }
     private processRequest(ctx: Context) {
         const context = JSON.parse(JSON.stringify(ctx));
-        this._onRequest.process([context]).catch((err)=>{
+        this._onRequest.process([context]).catch((err) => {
             this.error(err);
         });
     }
 
-    private _useConsole: boolean= false;
+    private _useConsole: boolean = false;
     useConsole() {
         this._useConsole = true;
         this.onLog((event: ApplicationEvent) => {
@@ -177,15 +179,11 @@ export class Application extends Koa {
         switch (this._runningState) {
             case ApplicationRunningState.Initialising:
                 this.setRunningState(ApplicationRunningState.Starting);
-                if (await this.processStartup())
-                    await this.startListeners();
-                else
-                    this.error('Startup Callbacks did not all return true');
+                if (await this.processStartup()) await this.startListeners();
+                else this.error('Startup Callbacks did not all return true');
 
-                if (this.getActiveListeners().length > 0)
-                    this.setRunningState(ApplicationRunningState.Listening);
-                else
-                    this.setRunningState(ApplicationRunningState.Ready);
+                if (this.getActiveListeners().length > 0) this.setRunningState(ApplicationRunningState.Listening);
+                else this.setRunningState(ApplicationRunningState.Ready);
 
                 break;
             case ApplicationRunningState.Starting:
@@ -202,27 +200,22 @@ export class Application extends Koa {
     }
 
     get isReady(): boolean {
-        if (this.runningState === ApplicationRunningState.Listening)
-            return true;
+        if (this.runningState === ApplicationRunningState.Listening) return true;
 
-        if (this.runningState === ApplicationRunningState.Ready)
-            return true;
+        if (this.runningState === ApplicationRunningState.Ready) return true;
 
         return false;
     }
 
     private async shutdown() {
-        if (this._runningState === ApplicationRunningState.ShuttingDown)
-            return;
+        if (this._runningState === ApplicationRunningState.ShuttingDown) return;
         this.setRunningState(ApplicationRunningState.ShuttingDown);
     }
 
     private _listeners: ApplicationListener[] = [];
     addHTTPListener(port?: number, host?: string, domain?: string): HTTPListener {
-        if (!port)
-            port = Number(process.env.PORT) || 8080;
-        if (!host)
-            host = '0.0.0.0';
+        if (!port) port = Number(process.env.PORT) || 8080;
+        if (!host) host = '0.0.0.0';
         const listener = new HTTPListener(this, host, port, domain);
         this._listeners.push(listener);
         return listener;
@@ -231,61 +224,51 @@ export class Application extends Koa {
     getActiveListeners() {
         const active: ApplicationListener[] = [];
         let listener: ApplicationListener;
-        for (listener of this._listeners)
-            if (listener.state === ListenerState.Listening)
-                active.push(listener);
+        for (listener of this._listeners) if (listener.state === ListenerState.Listening) active.push(listener);
 
         return active;
     }
 
     private async startListeners() {
         let listener: ApplicationListener;
-        for (listener of this._listeners)
-            await listener.listen();
+        for (listener of this._listeners) await listener.listen();
     }
 
     private async _requestMiddleware(ctx: Context, next: Next) {
         ctx._started = new Date();
 
         // set server banner
-        if (this.banner)
-            ctx.set('Server', this.banner);
+        if (this.banner) ctx.set('Server', this.banner);
 
         // close connection if shutting down
-        if (this.runningState === ApplicationRunningState.ShuttingDown)
-            ctx.set('Connection', 'close');
+        if (this.runningState === ApplicationRunningState.ShuttingDown) ctx.set('Connection', 'close');
 
         // 503 if not ready
-        if (!this.isReady)
-            return (ctx.status = 503);
+        if (!this.isReady) return (ctx.status = 503);
 
         // handle request
         await next();
-
     }
-
 
     private _shutdownTimeout: number = 5000;
     private _shutdownTimer: Timer | null = null;
     private _handleSIGTERM() {
         this.warn('Received SIGTERM');
-        this._initShutdown().catch((err)=>{
+        this._initShutdown().catch((err) => {
             console.error(err);
             process.exit(-1);
         });
     }
     private _handleSIGINT() {
         this.warn('Received SIGINT');
-        this._initShutdown().catch((err)=>{
+        this._initShutdown().catch((err) => {
             console.error(err);
             process.exit(-1);
         });
     }
     private async _initShutdown() {
-
         // exit if already shutting down
-        if (this.runningState === ApplicationRunningState.ShuttingDown)
-            return;
+        if (this.runningState === ApplicationRunningState.ShuttingDown) return;
 
         // change state to shutting down
         this.setRunningState(ApplicationRunningState.ShuttingDown);
@@ -298,9 +281,7 @@ export class Application extends Koa {
 
         // attempt shutdown
         const result = await this._onShutdown.process();
-        if (result)
-            process.exit(0);
-        else if (result)
-            process.exit(-1);
+        if (result) process.exit(0);
+        else if (result) process.exit(-1);
     }
 }

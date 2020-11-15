@@ -1,4 +1,3 @@
-
 import { ListenerState, ListenerType } from '../enum';
 import { Application } from '../class/Application';
 
@@ -19,21 +18,14 @@ export class BaseListener {
         process.exit(1);
     }
 
-
-
     async shutdown() {
-        if (this._shutdownTimer)
-            return;
+        if (this._shutdownTimer) return;
 
-        this._shutdownTimer = setTimeout(
-            this.shutdownTimedOut.bind(this),
-            this.shutdownTimeout
-        );
+        this._shutdownTimer = setTimeout(this.shutdownTimedOut.bind(this), this.shutdownTimeout);
 
         try {
             await this.close();
-            if (this._shutdownTimer)
-                clearTimeout(this._shutdownTimer);
+            if (this._shutdownTimer) clearTimeout(this._shutdownTimer);
         } catch (err) {
             this.shutdownTimedOut();
         }
@@ -46,13 +38,13 @@ export class BaseListener {
         const listening = await this._listen();
         if (!listening) {
             this.state = ListenerState.Error;
-            return false
+            return false;
         }
 
         this.state = ListenerState.Listening;
-        this.app.info(this.app.getBanner() + ' at ' + this.getListeningAddress())
+        this.app.info(this.app.getBanner() + ' at ' + this.getListeningAddress());
 
-        return listening
+        return listening;
     }
 
     async close(): Promise<boolean> {
