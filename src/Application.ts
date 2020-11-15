@@ -46,12 +46,16 @@ export class Application extends Koa {
 
         if (opts?.shutdownTimeout) this._shutdownTimeout = opts.shutdownTimeout;
 
+        if (opts?.sendReadyOnceListening)
+            this.sendReadyOnceListening()
+
         // initialising state
         this._runningState = this.setRunningState(ApplicationRunningState.Initialising);
 
         // listen to process events
         process.on('SIGTERM', this._handleSIGTERM.bind(this));
         process.on('SIGINT', this._handleSIGINT.bind(this));
+        process.on('message', this._handleMessage.bind(this));
 
         this.use(this._healthCheckMiddleware.bind(this));
         this.use(this._requestMiddleware.bind(this));
@@ -295,22 +299,21 @@ export class Application extends Koa {
     }
 
     private _shutdownTimeout: number = 5000;
-    private _shutdownTimer: Timer | null = null;
     private _handleSIGTERM() {
-        this.warn('Received SIGTERM');
-        this._initShutdown().catch((err) => {
-            console.error(err);
-            process.exit(-1);
-        });
+        return this._shutdown('Received SIGTERM');
     }
     private _handleSIGINT() {
-        this.warn('Received SIGINT');
-        this._initShutdown().catch((err) => {
-            console.error(err);
-            process.exit(-1);
-        });
+        return this._shutdown('Received SIGINT');
     }
-    private async _initShutdown() {
+    private _handleMessage(message: any) {
+        if (message === 'shutdown')
+            this._shutdown('Received shutdown message');
+    }
+    private _shutdown(warning?: string) {
+        // warning message
+        if (warning)
+            this.warn(warning);
+
         // exit if already shutting down
         if (this.runningState === ApplicationRunningState.ShuttingDown) return;
 
@@ -324,12 +327,20 @@ export class Application extends Koa {
         }, this._shutdownTimeout);
 
         // attempt shutdown
-        const result = await this._onShutdown.process();
-        if (result) process.exit(0);
-        else if (result) process.exit(-1);
+        this._onShutdown.process().then((result:boolean) => {
+            if (result) process.exit(0);
+            else if (result) process.exit(-1);
+        }).catch((err) => {
+            console.error(err);
+            process.exit(-1);
+        });
     }
 
-    usePM2() {
+    private _sendReadyOnceListening: boolean = false
+    sendReadyOnceListening() {
+        if (this._sendReadyOnceListening)
+            return;
+        this._sendReadyOnceListening = true;
         this.onListening(() => {
             if (process && process.send) process.send('ready');
         });

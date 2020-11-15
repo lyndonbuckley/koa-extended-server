@@ -12,6 +12,7 @@ export interface ApplicationOptions {
     shutdownCallbackMode?: EventCallbackMode;
     listeningCallbackMode?: EventCallbackMode;
     shutdownTimeout?: number;
+    sendReadyOnceListening?: boolean;
     healthCheck?: {
         endpoint?: string | string[];
         userAgent?: string | string[];
