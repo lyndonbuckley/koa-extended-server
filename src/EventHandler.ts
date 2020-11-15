@@ -1,6 +1,6 @@
 import { Application } from './Application';
-import { EventCallbackMode, EventType } from '../enum';
-import { ApplicationEvent, ApplicationEventCallback, CallbackArguments } from '../types';
+import { EventCallbackMode, EventType } from './enum';
+import { ApplicationEvent, ApplicationEventCallback, CallbackArguments } from './types';
 
 export class EventHandler<T = CallbackArguments> {
     app: Application;

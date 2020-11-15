@@ -1,4 +1,4 @@
-import { Application } from './class/Application';
+import { Application } from './Application';
 import { Context, Next } from 'koa';
 
 const app = new Application({

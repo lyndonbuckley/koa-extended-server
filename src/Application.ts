@@ -1,7 +1,7 @@
 import Koa = require('koa');
 import Timer = NodeJS.Timer;
 import { Server } from 'http';
-import { ApplicationRunningState, EventType, ListenerState } from '../enum';
+import { ApplicationRunningState, EventType, ListenerState } from './enum';
 import {
     ApplicationEvent,
     ApplicationEventCallback,
@@ -9,9 +9,9 @@ import {
     ApplicationOptions,
     CallbackArguments,
     HealthCheckOptions,
-} from '../types';
+} from './types';
 import { EventHandler } from './EventHandler';
-import { HTTPListener } from '../listener/HTTPListener';
+import { HTTPListener } from './HTTPListener';
 import { Context, Next } from 'koa';
 
 export class Application extends Koa {

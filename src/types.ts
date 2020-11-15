@@ -1,8 +1,6 @@
-import { EventCallbackMode, EventType, ListenerType } from './enum';
-import { Application } from './class/Application';
-import { Context } from 'koa';
-import { HTTPListener } from './listener/HTTPListener';
-import { BaseListener } from './listener/BaseListener';
+import { EventCallbackMode, EventType } from './enum';
+import { Application } from './Application';
+import { HTTPListener } from './HTTPListener';
 
 export interface ApplicationOptions {
     banner?: string;

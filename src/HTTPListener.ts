@@ -1,8 +1,8 @@
 import { createServer, Server } from 'http';
 
-import { ListenerState, ListenerType } from '../enum';
+import { ListenerType } from './enum';
 import { BaseListener } from './BaseListener';
-import { Application } from '../class/Application';
+import { Application } from './Application';
 
 export class HTTPListener extends BaseListener {
     server: Server;

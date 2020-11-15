@@ -1,5 +1,5 @@
-import { ListenerState, ListenerType } from '../enum';
-import { Application } from '../class/Application';
+import { ListenerState, ListenerType } from './enum';
+import { Application } from './Application';
 
 export class BaseListener {
     app: Application;
