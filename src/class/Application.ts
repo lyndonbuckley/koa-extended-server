@@ -50,13 +50,12 @@ export class Application extends Koa {
 
     private setRunningState(state: ApplicationRunningState) {
         this._runningState = state;
-        const message = this.getBanner() + ' is ' + state;
         switch (state) {
             case ApplicationRunningState.ShuttingDown:
-                this.warn(message);
+                this.warn(this.getBanner(state));
                 break;
             default:
-                this.log(message);
+                this.info(this.getBanner(state));
         }
         return state;
     }
