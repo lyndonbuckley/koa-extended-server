@@ -35,16 +35,15 @@ export class Application extends Koa {
 
         if (opts?.healthCheck?.userAgent && Array.isArray(opts.healthCheck.userAgent))
             this.healthCheck.userAgent = opts.healthCheck.userAgent;
-        else if (opts?.healthCheck?.userAgent && typeof (opts.healthCheck.userAgent) === "string")
+        else if (opts?.healthCheck?.userAgent && typeof opts.healthCheck.userAgent === 'string')
             this.healthCheck.userAgent = [opts.healthCheck.userAgent];
 
         if (opts?.healthCheck?.endpoint && Array.isArray(opts.healthCheck.endpoint))
             this.healthCheck.endpoint = opts.healthCheck.endpoint;
-        else if (opts?.healthCheck?.endpoint && typeof (opts.healthCheck.endpoint) === "string")
+        else if (opts?.healthCheck?.endpoint && typeof opts.healthCheck.endpoint === 'string')
             this.healthCheck.endpoint = [opts.healthCheck.endpoint];
 
-        if (opts?.shutdownTimeout)
-            this._shutdownTimeout = opts.shutdownTimeout;
+        if (opts?.shutdownTimeout) this._shutdownTimeout = opts.shutdownTimeout;
 
         // initialising state
         this._runningState = this.setRunningState(ApplicationRunningState.Initialising);
@@ -62,32 +61,25 @@ export class Application extends Koa {
 
     // HEALTH CHECK
     healthCheck: HealthCheckOptions = {
-        endpoint: [
-            '/health-check'
-        ],
-        userAgent: [
-            'GoogleHC/1.0',
-            'Mozilla/5.0+(compatible; UptimeRobot/2.0; http://www.uptimerobot.com/)'
-        ]
-    }
+        endpoint: ['/health-check'],
+        userAgent: ['GoogleHC/1.0', 'Mozilla/5.0+(compatible; UptimeRobot/2.0; http://www.uptimerobot.com/)'],
+    };
 
     private async _healthCheckMiddleware(ctx: Context, next: Next) {
-        const userAgent = ctx.request.headers['user-agent']||'';
-        if (this.healthCheck.userAgent.indexOf(userAgent) >= 0)
-            return this._handleHealthCheck(ctx);
+        const userAgent = ctx.request.headers['user-agent'] || '';
+        if (this.healthCheck.userAgent.indexOf(userAgent) >= 0) return this._handleHealthCheck(ctx);
 
-        if (this.healthCheck.endpoint.indexOf(ctx.path) >= 0)
-            return this._handleHealthCheck(ctx);
+        if (this.healthCheck.endpoint.indexOf(ctx.path) >= 0) return this._handleHealthCheck(ctx);
 
         return await next();
     }
 
     private _handleHealthCheck(ctx: Context) {
-        ctx.status = (this.runningState === ApplicationRunningState.Listening) ? 200 : 503;
+        ctx.status = this.runningState === ApplicationRunningState.Listening ? 200 : 503;
         ctx.body = {
             state: this.runningState,
-            uptime: process.uptime()
-        }
+            uptime: process.uptime(),
+        };
     }
 
     private _runningState: ApplicationRunningState;

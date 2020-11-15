@@ -13,14 +13,14 @@ export interface ApplicationOptions {
     shutdownCallbackMode?: EventCallbackMode;
     shutdownTimeout?: number;
     healthCheck?: {
-        endpoint?: string | (string[]),
-        userAgent?: string | (string[])
-    }
+        endpoint?: string | string[];
+        userAgent?: string | string[];
+    };
 }
 
 export interface HealthCheckOptions {
-    endpoint: string[],
-    userAgent: string[]
+    endpoint: string[];
+    userAgent: string[];
 }
 
 export type CallbackArguments = [any?, ...any[]];
