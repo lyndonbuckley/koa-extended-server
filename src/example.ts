@@ -31,6 +31,7 @@ async function demoCountdown(label: string, limit: number = 5): Promise<boolean>
             else
                 setTimeout(step, 1000);
         }
+        console.info(label + ' in ' + (limit - count + 1));
         setTimeout(step, 1000);
     });
 }
