@@ -323,4 +323,11 @@ export class Application extends Koa {
         if (result) process.exit(0);
         else if (result) process.exit(-1);
     }
+
+    usePM2() {
+        this.onListening(() => {
+            if (process && process.send)
+                process.send('ready');
+        });
+    }
 }
