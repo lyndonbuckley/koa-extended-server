@@ -220,13 +220,10 @@ export class Application extends Koa {
             case ApplicationRunningState.Initialising:
                 this.setRunningState(ApplicationRunningState.Starting);
 
-                if (await this.processStartup())
-                    this.setRunningState(ApplicationRunningState.Ready);
-                else
-                    this.error('Startup Callbacks did not all return true');
+                if (await this.processStartup()) this.setRunningState(ApplicationRunningState.Ready);
+                else this.error('Startup Callbacks did not all return true');
 
-                if (this.runningState === ApplicationRunningState.Ready)
-                    await this.startListeners();
+                if (this.runningState === ApplicationRunningState.Ready) await this.startListeners();
 
                 if (this.getActiveListeners().length > 0) {
                     this.setRunningState(ApplicationRunningState.Listening);
@@ -334,8 +331,7 @@ export class Application extends Koa {
 
     usePM2() {
         this.onListening(() => {
-            if (process && process.send)
-                process.send('ready');
+            if (process && process.send) process.send('ready');
         });
     }
 }

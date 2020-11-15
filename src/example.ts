@@ -11,7 +11,7 @@ const app = new Application({
         return await demoCountdown('Shutting Down');
     },
     onListening: () => {
-        console.log('On Listening Has Been Called')
+        console.log('On Listening Has Been Called');
     },
 });
 

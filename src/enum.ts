@@ -30,5 +30,5 @@ export enum ListenerState {
 export enum EventCallbackMode {
     Series = 'series',
     Parallel = 'parallel',
-    Background = 'background'
+    Background = 'background',
 }
