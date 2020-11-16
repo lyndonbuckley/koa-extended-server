@@ -19,10 +19,13 @@ app.use(async (ctx: Context, next: Next) => {
     ctx.body = 'Hello World';
 });
 
-app.addHTTPListener(8080);
-app.start().catch((err) => {
-    console.error(err);
+app.addHealthCheck((ctx: Context) => {
+    console.log('Health Check on ' + ctx.url);
+    return true;
 });
+
+app.addHTTPListener(8080);
+app.start();
 
 async function demoCountdown(label: string, limit: number = 3): Promise<boolean> {
     return await new Promise((resolve, reject) => {

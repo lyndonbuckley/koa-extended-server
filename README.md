@@ -49,4 +49,53 @@ common functionality used when creating services and APIs using Koa Framework (h
 
 #### onStartup
 
-Use *app.onStartup()* to register a function that will 
+Perform operations or checks before starting server - Example use cases:
+
+- Connect to Database ORM
+```typescript
+const dbConnection: Connection;
+async function connectToDatabase(): Promise<boolean> {
+ dbConnection = await createConnection();
+    return dbConnection.isConnected;
+}
+
+const app = new Application();
+app.onStartup(connectToDatabase);
+```
+
+- Subscribe to PubSub Topic
+
+```typescript
+import {PubSub} from '@google-cloud/pubsub';
+const pubSubClient = new PubSub();
+async function subscribe() {
+    const sub = await pubSubClient.topic('TOPIC_NAME').createSubscription('UNIQUE_NAME');
+    return sub ? true : false;
+}
+
+const app = new Application({
+    onStartup: subscribe
+})
+```
+
+
+### Health Checks
+
+Specifying userAgent in options
+```typescript 
+const app = new Application({
+    healthCheckEndpoint: '/health-check'
+});
+```
+Specifying userAgent in options
+```typescript 
+const app = new Application({
+    healthCheckUserAgent: 'GoogleHC/1.0'
+});
+```
+Setting via parameter
+```typescript 
+const app = new Application();
+app.healthCheckEndpoint = '/health-check';
+app.healthCheckUserAgent = ['GoogleHC/1.0','NS1 HTTP Monitoring Job'];
+```

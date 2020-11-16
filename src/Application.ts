@@ -1,5 +1,4 @@
 import Koa = require('koa');
-import Timer = NodeJS.Timer;
 import { Server } from 'http';
 import { ApplicationRunningState, EventType, ListenerState } from './enum';
 import {
@@ -8,7 +7,7 @@ import {
     ApplicationListener,
     ApplicationOptions,
     CallbackArguments,
-    HealthCheckOptions,
+    HealthCheckCallback,
 } from './types';
 import { EventHandler } from './EventHandler';
 import { HTTPListener } from './HTTPListener';
@@ -29,25 +28,16 @@ export class Application extends Koa {
         this._onWarn = new EventHandler(this, EventType.Warn);
         this._onError = new EventHandler(this, EventType.Error);
 
+        // add default health check
+        this.addHealthCheck(this._defaultHealthCheck);
+
         // options
         if (opts?.banner) this.banner = opts.banner;
-
         if (opts?.useConsole) this.useConsole();
-
-        if (opts?.healthCheck?.userAgent && Array.isArray(opts.healthCheck.userAgent))
-            this.healthCheck.userAgent = opts.healthCheck.userAgent;
-        else if (opts?.healthCheck?.userAgent && typeof opts.healthCheck.userAgent === 'string')
-            this.healthCheck.userAgent = [opts.healthCheck.userAgent];
-
-        if (opts?.healthCheck?.endpoint && Array.isArray(opts.healthCheck.endpoint))
-            this.healthCheck.endpoint = opts.healthCheck.endpoint;
-        else if (opts?.healthCheck?.endpoint && typeof opts.healthCheck.endpoint === 'string')
-            this.healthCheck.endpoint = [opts.healthCheck.endpoint];
-
+        if (opts?.healthCheckUserAgent) this.healthCheckUserAgent = opts.healthCheckUserAgent;
+        if (opts?.healthCheckEndpoint) this.healthCheckEndpoint = opts.healthCheckEndpoint;
         if (opts?.shutdownTimeout) this._shutdownTimeout = opts.shutdownTimeout;
-
-        if (opts?.sendReadyOnceListening)
-            this.sendReadyOnceListening()
+        if (opts?.sendReadyOnceListening) this.sendReadyOnceListening();
 
         // initialising state
         this._runningState = this.setRunningState(ApplicationRunningState.Initialising);
@@ -65,28 +55,61 @@ export class Application extends Koa {
     proxy: boolean = true;
 
     // HEALTH CHECK
-    healthCheck: HealthCheckOptions = {
-        endpoint: [],
-        userAgent: [
-            'GoogleHC/1.0',
-            'Mozilla/5.0+(compatible; UptimeRobot/2.0; http://www.uptimerobot.com/)',
-            'NS1 HTTP Monitoring Job'
-        ],
-    };
+    private _healthCheckEndpoint: string[] = [];
+    get healthCheckEndpoint(): string | string[] {
+        return this._healthCheckEndpoint;
+    }
+    set healthCheckEndpoint(endpoint: string | string[]) {
+        if (typeof endpoint === 'string') endpoint = [endpoint];
+        this._healthCheckEndpoint = endpoint;
+    }
+
+    private _healthCheckUserAgent: string[] = [
+        'GoogleHC/1.0',
+        'Mozilla/5.0+(compatible; UptimeRobot/2.0; http://www.uptimerobot.com/)',
+        'NS1 HTTP Monitoring Job',
+        'ELB-HealthChecker/2.0',
+    ];
+    get healthCheckUserAgent(): string | string[] {
+        return this._healthCheckUserAgent;
+    }
+    set healthCheckUserAgent(userAgent: string | string[]) {
+        if (typeof userAgent === 'string') userAgent = [userAgent];
+        this._healthCheckUserAgent = userAgent;
+    }
 
     private async _healthCheckMiddleware(ctx: Context, next: Next) {
         const userAgent = ctx.request.headers['user-agent'] || '';
-        if (this.healthCheck.userAgent.indexOf(userAgent) >= 0) return this._handleHealthCheck(ctx);
-        if (this.healthCheck.endpoint.indexOf(ctx.path) >= 0) return this._handleHealthCheck(ctx);
+        if (this._healthCheckUserAgent.indexOf(userAgent) >= 0) return await this._handleHealthCheck(ctx);
+        if (this._healthCheckEndpoint.indexOf(ctx.path) >= 0) return await this._handleHealthCheck(ctx);
         return await next();
     }
 
-    private _handleHealthCheck(ctx: Context) {
-        ctx.status = this.runningState === ApplicationRunningState.Listening ? 200 : 503;
+    private async _handleHealthCheck(ctx: Context) {
+        const healthy: boolean = await this._performHealthChecks(ctx);
+        ctx.status = healthy ? 200 : 503;
         ctx.body = {
+            healthy,
             state: this.runningState,
             uptime: process.uptime(),
         };
+    }
+
+    private _healthChecks: HealthCheckCallback[] = [];
+    private async _performHealthChecks(ctx: Context) {
+        let callback: HealthCheckCallback;
+        for (callback of this._healthChecks) {
+            let result: Promise<boolean> | boolean = callback(ctx);
+            if (result instanceof Promise) result = await result;
+            if (result !== true) return false;
+        }
+        return true;
+    }
+    private _defaultHealthCheck(ctx: Context) {
+        return this.runningState === ApplicationRunningState.Listening ? true : false;
+    }
+    addHealthCheck(callback: HealthCheckCallback) {
+        this._healthChecks.push(callback);
     }
 
     private _runningState: ApplicationRunningState;
@@ -223,7 +246,7 @@ export class Application extends Koa {
     private async processStartup(): Promise<boolean> {
         return this._onStartup.process();
     }
-    async start() {
+    private async _start() {
         switch (this._runningState) {
             case ApplicationRunningState.Initialising:
                 this.setRunningState(ApplicationRunningState.Starting);
@@ -249,6 +272,9 @@ export class Application extends Koa {
                 throw new Error('Called Start function when shutting down');
                 return;
         }
+    }
+    start() {
+        this._start().catch(this.error);
     }
 
     get isReady(): boolean {
@@ -310,13 +336,11 @@ export class Application extends Koa {
         return this._shutdown('Received SIGINT');
     }
     private _handleMessage(message: any) {
-        if (message === 'shutdown')
-            this._shutdown('Received shutdown message');
+        if (message === 'shutdown') this._shutdown('Received shutdown message');
     }
     private _shutdown(warning?: string) {
         // warning message
-        if (warning)
-            this.warn(warning);
+        if (warning) this.warn(warning);
 
         // exit if already shutting down
         if (this.runningState === ApplicationRunningState.ShuttingDown) return;
@@ -331,19 +355,21 @@ export class Application extends Koa {
         }, this._shutdownTimeout);
 
         // attempt shutdown
-        this._onShutdown.process().then((result:boolean) => {
-            if (result) process.exit(0);
-            else if (result) process.exit(-1);
-        }).catch((err) => {
-            console.error(err);
-            process.exit(-1);
-        });
+        this._onShutdown
+            .process()
+            .then((result: boolean) => {
+                if (result) process.exit(0);
+                else if (result) process.exit(-1);
+            })
+            .catch((err) => {
+                console.error(err);
+                process.exit(-1);
+            });
     }
 
-    private _sendReadyOnceListening: boolean = false
+    private _sendReadyOnceListening: boolean = false;
     sendReadyOnceListening() {
-        if (this._sendReadyOnceListening)
-            return;
+        if (this._sendReadyOnceListening) return;
         this._sendReadyOnceListening = true;
         this.onListening(() => {
             if (process && process.send) process.send('ready');

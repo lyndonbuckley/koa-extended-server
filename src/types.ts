@@ -1,6 +1,7 @@
 import { EventCallbackMode, EventType } from './enum';
 import { Application } from './Application';
 import { HTTPListener } from './HTTPListener';
+import { Context } from 'koa';
 
 export interface ApplicationOptions {
     banner?: string;
@@ -13,17 +14,11 @@ export interface ApplicationOptions {
     listeningCallbackMode?: EventCallbackMode;
     shutdownTimeout?: number;
     sendReadyOnceListening?: boolean;
-    healthCheck?: {
-        endpoint?: string | string[];
-        userAgent?: string | string[];
-    };
+    healthCheckEndpoint?: string | string[];
+    healthCheckUserAgent?: string | string[];
 }
 
-export interface HealthCheckOptions {
-    endpoint: string[];
-    userAgent: string[];
-}
-
+export type HealthCheckCallback = (ctx: Context) => Promise<boolean> | boolean;
 export type CallbackArguments = [any?, ...any[]];
 export type ApplicationEventCallback<T = CallbackArguments> = (event: ApplicationEvent<T>) => Promise<any> | any;
 export type ApplicationListener = HTTPListener;
