@@ -1,6 +1,18 @@
 # koa-extended-server
 Extended Microservice Server for Koa
 
+## Intro
+
+This package is a starting point for
+common functionality used when creating services and APIs using Koa Framework (https://github.com/koajs)
+
+- Multiple Listeners
+- Graceful Startup/Shutdown (with support for process messages)
+- Built-in Health Check Endpoints/Middleware
+
+
+## Example
+
 ```typescript
 import {Application} from "koa-extended-server"
 import {createConnection, Conection} from "typeorm";
@@ -34,17 +46,8 @@ app.addHTTPListener(8080);
 app.start();
 
 ```
-## Intro
-
-This package is a starting point for
-common functionality used when creating services and APIs using Koa Framework (https://github.com/koajs)
 
 ## Features
-
-- Multiple Listeners
-- Graceful Startup/Shutdown (with support for process messages)
-- Built-in Health Check Endpoints/Middleware
-
 ### Graceful Startup/Shutdown
 
 #### onStartup
