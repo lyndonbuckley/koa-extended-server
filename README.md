@@ -47,14 +47,13 @@ app.start();
 
 ```
 
-## Features
-### Graceful Startup/Shutdown
+## Graceful Startup/Shutdown
 
-#### onStartup
+### onStartup
 
 Perform operations or checks before starting server - Example use cases:
 
-##### Connect to Database ORM
+#### Connect to Database ORM
 ```typescript
 const dbConnection: Connection;
 async function connectToDatabase(): Promise<boolean> {
@@ -66,7 +65,7 @@ const app = new Application();
 app.onStartup(connectToDatabase);
 ```
 
-##### Subscribe to PubSub Topic
+#### Subscribe to PubSub Topic
 
 ```typescript
 import {PubSub} from '@google-cloud/pubsub';
@@ -82,21 +81,21 @@ const app = new Application({
 ```
 
 
-### Health Checks
+## Health Checks
 
-##### Specifying userAgent in options
+#### Specifying userAgent in options
 ```typescript 
 const app = new Application({
     healthCheckEndpoint: '/health-check'
 });
 ```
-##### Specifying userAgent in options
+#### Specifying userAgent in options
 ```typescript 
 const app = new Application({
     healthCheckUserAgent: 'GoogleHC/1.0'
 });
 ```
-##### Setting via parameter
+#### Setting via parameter
 ```typescript 
 const app = new Application();
 app.healthCheckEndpoint = '/health-check';
