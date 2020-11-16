@@ -13,7 +13,6 @@ const app = new Application({
     onListening: () => {
         console.log('On Listening Has Been Called');
     },
-
 });
 
 app.use(async (ctx: Context, next: Next) => {
