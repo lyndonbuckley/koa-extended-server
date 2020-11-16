@@ -29,7 +29,7 @@ export class Application extends Koa {
         this._onError = new EventHandler(this, EventType.Error);
 
         // add default health check
-        this.addHealthCheck(this._defaultHealthCheck);
+        this.addHealthCheck(this._defaultHealthCheck.bind(this));
 
         // options
         if (opts?.banner) this.banner = opts.banner;

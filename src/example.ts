@@ -13,12 +13,14 @@ const app = new Application({
     onListening: () => {
         console.log('On Listening Has Been Called');
     },
+
 });
 
 app.use(async (ctx: Context, next: Next) => {
     ctx.body = 'Hello World';
 });
 
+app.healthCheckEndpoint = '/healthy';
 app.addHealthCheck((ctx: Context) => {
     console.log('Health Check on ' + ctx.url);
     return true;
