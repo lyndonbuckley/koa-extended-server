@@ -1,20 +1,9 @@
 {
   "name": "koa-extended-server",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": " An extended server for Koa",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "tslint -p tsconfig.json",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run lint",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
-  },
   "files": [
     "lib/**/*"
   ],
@@ -32,16 +21,5 @@
   "bugs": {
     "url": "https://github.com/lyndonbuckley/koa-extended-server/issues"
   },
-  "homepage": "https://github.com/lyndonbuckley/koa-extended-server#readme",
-  "devDependencies": {
-    "@types/node": "^13.13.2",
-    "prettier": "^2.0.5",
-    "tslint": "^6.1.1",
-    "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.8.3",
-    "@types/koa": "^2.11.6"
-  },
-  "dependencies": {
-    "koa": "^2.13.0"
-  }
+  "homepage": "https://github.com/lyndonbuckley/koa-extended-server#readme"
 }
